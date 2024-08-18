@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Sign-up</title>
+
+    <link rel="stylesheet" href="static/css/login.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{%url 'index'%}">AirFinder</a>
+    </nav>
+    <div class="main-content">
+        <div class="form-container">
+            <div class="form-col">
+                <div class="btn-box">
+                    <button class="btn btn-1" id="login">Sign In</button>
+                    <button class="btn btn-2" id="register">Sign Up</button>
+                </div>
+    
+                <!--Login form container-->
+                <form class="form-box login-form" method="POST" action="{% url 'register' %}">
+                    {% csrf_token %}
+                    <div class="form-title">
+                        <span>Sign In</span>
+                    </div>
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <div class="form-inputs">
+                        <div class="input-box">
+                            <input type="text" name="username" id="logUsername" class="inputs input-field" placeholder="Username" required>
+                            <ion-icon name="person-outline" class="icon"></ion-icon>
+                        </div>
+                        <div class="input-box">
+                            <input type="password" name="password" oninput="changeIconLog(this.value)" id="logPassword" class="inputs input-field" placeholder="Password" required>
+                            <ion-icon name="lock-closed-outline" class="icon" id="log-pass-icon" onclick="myLogPassword()"></ion-icon>
+                        </div>
+                        <div class="forgot-pass">
+                            <a href="#" target="_blank">Forgot Password?</a>
+                        </div>
+                        <div class="input-box">
+                            <button class="inputs submit-btn" type="submit" name="action" value="signin">
+                                <span>Sign In</span>
+                                <ion-icon name="arrow-forward-outline" class="icon"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="social-login">
+                        <div class="social-login-box">
+                            <a  target="_blank" href="https://github.com/shaharishay14">
+                                <ion-icon name="logo-github" class="social-login-icon"></ion-icon>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+    
+                <!--Register form container-->
+                <form class="form-box register-form" action="{% url 'register'%}" method="POST">   
+                    {%csrf_token%}
+                    <div class="form-title">
+                        <span>Sign Up</span>
+                    </div>
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <div class="form-inputs">
+                        <div class="input-box">
+                            <input type="text" name="username" id="regUsername" class="inputs input-field" placeholder="Username" required>
+                            <ion-icon name="person-outline" class="icon"></ion-icon>
+                        </div>
+                        <div class="input-box">
+                            <input type="text" name="email" id="regEmail" class="inputs input-field" placeholder="Email" required>
+                            <ion-icon name="mail-outline" class="icon"></ion-icon>                    
+                        </div>
+                        <div class="input-box">
+                            <input type="password" name="password" oninput="changeIconReg(this.value)" id="regPassword" class="inputs input-field" placeholder="Password" required>
+                            <ion-icon name="lock-closed-outline" class="icon" id="reg-pass-icon" onclick="myRegPassword()"></ion-icon>
+                        </div>
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember-me-check">
+                            <label for="remember-me-check">Remember me</label>
+                        </div>
+                        <div class="input-box">
+                            <button class="inputs submit-btn" type="submit" name="action" value="signup">
+                                <span>Sign Up</span>
+                                <ion-icon name="arrow-forward-outline" class="icon"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="social-login">
+                        <div class="social-login-box">
+                            <a target="_blank" href="https://github.com/shaharishay14">
+                                <ion-icon name="logo-github" class="social-login-icon"></ion-icon>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+
+
+
+
+
+    <script src="static/js/login.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirFinder</title>
+
+    <link rel="stylesheet" href="static/css/contact.css">
+</head>
+<body>
+    <header class="header">
+        <span class="title-text">
+            <a href="{%url 'index'%}">AirFinder</a>
+        </span>
+        <div class="title-links">
+            <a href="{%url 'index'%}">Home</a>
+            <ion-icon name="home" class="home-icon"></ion-icon>
+            <a href="{%url 'about'%}">About</a>
+            <ion-icon name="information-circle" class="info-icon"></ion-icon>
+            <a href="{%url 'contact'%}">Contact</a>
+            <ion-icon name="mail-open" class="contact-icon"></ion-icon>
+        </div>
+        <div class="btn-box">
+            {% if request.user.is_authenticated %}
+                <button class="btn btn-1" id="search" onclick="openSearchPage()">Search</button>
+            {% else %}
+                <button class="btn btn-1" id="login" onclick="openLoginPage()">Sign In</button>
+                <button class="btn btn-2" id="register" onclick="openRegisterPage()">Sign Up</button>
+            {% endif %}    
+        </div>
+    </header>
+    <div class="container">
+        <header class="info-text-title">
+            Contact Me
+        </header>
+        <p class="info-text p1">
+           If you have any questions or feedback, please don't hesitate to reach out to me. You can contact me through the following channels:   
+           
+           
+        </p>
+        <p class="info-text">
+            Email: airfindermail@gmail.com
+        </p>
+        <p class="info-text git-link">
+            Github: 
+            <a target="_blank" href="https://github.com/shaharishay14">Git Link</a>
+        </p>
+    </div>
+
+    <script type="text/javascript">
+        var loginUrl = "{% url 'register' %}";
+        var registerUrl = "{% url 'register' %}";
+        var searchUrl = "{% url 'search' %}"  // Assuming you have a named URL for registration
+    </script> 
+    <script src="static/js/index.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+</body>
+</html>

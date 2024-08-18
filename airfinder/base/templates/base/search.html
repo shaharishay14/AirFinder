@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+
+    <link rel="stylesheet" href="static/css/search.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{%url 'index'%}">AirFinder</a>
+        <div class="action">
+            <div class="profile" onclick="menuToggle();">
+              <img src="/static/img/user.png"/>
+            </div>
+            <div class="menu">
+              <h3>{{request.user}}<br/></h3>
+              <ul>
+                <li>
+                  <img src="/static/img/user.png" /><a href="{% url 'my_listings'%}">My Listings</a>
+                </li>
+                <li>
+                  <img src="/static/img/log-out.png" /><a href="{%url 'logout'%}">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <script>
+            function menuToggle() {
+              const toggleMenu = document.querySelector(".menu");
+              toggleMenu.classList.toggle("active");
+            }
+          </script>
+    </nav>
+    <div class="search-bar-container">
+        <form method="POST" action="{% url 'search' %}">
+            {% csrf_token %}
+            <div class="options-container">
+                <div>
+                    <ion-icon name="location-outline" class="bar-icon"></ion-icon>
+                    <label class="location-label">Location</label>
+                    <input class="location-input" type="text" id="location" name="city" placeholder="Where Are You Staying?">
+                    <div class="results-box" id="location-results">
+                    </div>                    
+                </div>
+                <div>
+                    <ion-icon name="calendar-outline" class="bar-icon"></ion-icon>
+                    <label>Check in</label>
+                    <input class="date-input" type="text" id="check-in-date" name="check-in" placeholder="Enter Date">
+                </div>
+                <div>
+                    <ion-icon name="calendar-outline" class="bar-icon"></ion-icon>
+                    <label>Check out</label>
+                    <input class="date-input" type="text" id="check-out-date" name="check-out" placeholder="Enter Date">
+                </div>
+                <div>
+                    <ion-icon name="people-outline" class="bar-icon"></ion-icon>
+                    <label>Guests</label>
+                    <input class="guest-input" type="text" id="guests" placeholder="Add Guests" aria-haspopup="true" aria-expanded="false">
+                    <div class="guest-menu-container" id="guests-menu">
+                        <div class="item">
+                            <div class="title">Adults</div>
+                            <div class="subtitle">Ages 13 or above</div>
+                            <div class="controls">
+                                <button class="count-button" data-count-id="adults-count" data-delta="-1">-</button>
+                                <span id="adults-count">0</span>
+                                <input type="hidden" name="adults" id="adults-input" value="0">
+                                <button class="count-button" data-count-id="adults-count" data-delta="1">+</button>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="title">Children</div>
+                            <div class="subtitle">Ages 2 – 12</div>
+                            <div class="controls">
+                                <button class="count-button" data-count-id="children-count" data-delta="-1">-</button>
+                                <span id="children-count">0</span>
+                                <input type="hidden" name="children" id="children-input" value="0">
+                                <button class="count-button" data-count-id="children-count" data-delta="1">+</button>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="title">Infants</div>
+                            <div class="subtitle">Under 2</div>
+                            <div class="controls">
+                                <button class="count-button" data-count-id="infants-count" data-delta="-1">-</button>
+                                <span id="infants-count">0</span>
+                                <input type="hidden" name="infants" id="infants-input" value="0">
+                                <button class="count-button" data-count-id="infants-count" data-delta="1">+</button>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="title">Pets</div>
+                            <div class="subtitle">Bringing a pet?</div>
+                            <div class="controls">
+                                <button class="count-button" data-count-id="pets-count" data-delta="-1">-</button>
+                                <span id="pets-count">0</span>
+                                <input type="hidden" name="pets" id="pets-input" value="0">
+                                <button class="count-button" data-count-id="pets-count" data-delta="1">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <button class="search-button" type="submit">
+                    <label class="search-button-label">Search</label>
+                    <ion-icon name="search-circle" class="search-icon"></ion-icon></ion-icon>
+                </button>
+            </div>
+        </form>
+    </div>
+    <div id="loader-container" class="loader-container">
+        <img src="/static/img/loader1.gif" alt="Loading..." />
+        <span>Redirecting You, Please Wait</span>
+    </div>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Function to check if input fields are empty
+            function isFieldEmpty(fieldId) {
+                var field = document.getElementById(fieldId);
+                return !field.value.trim();
+            }
+
+            // List of required field IDs
+            var requiredFields = ['location', 'check-in-date', 'check-out-date'];
+
+            // Check for empty fields and collect errors
+            var isEmpty = requiredFields.some(field => isFieldEmpty(field));
+            if (isEmpty) {
+                alert("Please fill in all required fields.");
+                return; // Stop here if there are empty fields
+            }
+
+           // Function to get numeric value from span text
+            function getNumberFromSpan(spanId) {
+                var text = document.getElementById(spanId).textContent;
+                var number = parseInt(text, 10);
+                return !isNaN(number) ? number : 0; // Return 0 if parsing fails
+            }
+
+            // Validate at least one adult
+            var adults = getNumberFromSpan('adults-count');
+            if (adults < 1) {
+                alert("Please enter at least one adult.");
+                return;
+            }
+
+            // Validate other guest numbers (0 or more)
+            var children = getNumberFromSpan('children-count');
+            var infants = getNumberFromSpan('infants-count');
+            var pets = getNumberFromSpan('pets-count');
+
+            if (children < 0 || infants < 0 || pets < 0) {
+                alert("Please enter a valid number (0 or more) for children, infants, and pets.");
+                return;
+            }
+
+            // Validate date inputs
+            var checkInDate = document.getElementById('check-in-date').value;
+            var checkOutDate = document.getElementById('check-out-date').value;
+            var inDate = new Date(checkInDate);
+            var outDate = new Date(checkOutDate);
+
+            if (outDate <= inDate) {
+                alert("Check-out date must be later than check-in date.");
+                return;
+            }
+
+            // If all fields are filled, show the loader and submit the form
+            document.getElementById('loader-container').style.opacity = 1;
+            this.submit(); // Proceed with form submission
+        });
+    </script>
+    <script>
+        function updateAdultsCount(value) {
+            document.getElementById('adults-count').textContent = value;
+            document.getElementById('adults-input').value = value;
+        }
+
+        function updateChildrenCount(value) {
+            document.getElementById('children-count').textContent = value;
+            document.getElementById('children-input').value = value;
+        }
+
+        function updateInfantsCount(value) {
+            document.getElementById('infants-count').textContent = value;
+            document.getElementById('infants-input').value = value;
+        }
+
+        function updatePetsCount(value) {
+            document.getElementById('pets-count').textContent = value;
+            document.getElementById('pets-input').value = value;
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.getElementById('guests').addEventListener('click', function(event) {
+        event.stopPropagation(); // Stop the event from bubbling up
+        event.preventDefault();  // Prevent any default action
+        var menu = document.getElementById('guests-menu');
+        var isExpanded = menu.classList.contains('active');
+        menu.classList.toggle('active');
+        event.target.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        function changeCount(change, id) {
+        var count = parseInt(document.getElementById(id).textContent);
+        count += change;
+        if (count < 0) count = 0; // Prevent negative numbers
+        document.getElementById(id).textContent = count;
+      }
+
+      document.querySelectorAll('.count-button').forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default form submission
+            const countId = event.target.getAttribute('data-count-id');
+            const delta = event.target.getAttribute('data-delta');
+            changeCount(parseInt(delta), countId);
+            });
+        });
+        function changeCount(delta, countId) {
+            const countSpan = document.getElementById(countId);
+            const inputId = countId.replace('-count', '-input');
+            const inputField = document.getElementById(inputId);
+
+            let count = parseInt(countSpan.textContent);
+            count = Math.max(0, count + delta);
+            
+            switch(countId) {
+                case 'adults-count':
+                    updateAdultsCount(count);
+                    break;
+                case 'children-count':
+                    updateChildrenCount(count);
+                    break;
+                case 'infants-count':
+                    updateInfantsCount(count);
+                    break;
+                case 'pets-count':
+                    updatePetsCount(count);
+                    break;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const menu = document.querySelector('.guest-menu-container');
+
+
+        document.addEventListener('click', function (e) {
+            // Check if the click is outside of menu 
+            if (!menu.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+    profile.addEventListener('click', function (e) {
+        // Toggle menu visibility
+        menu.classList.toggle('active');
+        e.stopPropagation(); // Prevent the document click handler from running
+    });
+});
+    </script>
+    <script>
+        flatpickr("#check-in-date", {
+            dateFormat: "m/d/Y",
+            minDate: "today",
+            maxDate: new Date().fp_incr(730) // 730 days from now
+        });
+
+        flatpickr("#check-out-date", {
+            dateFormat: "m/d/Y",
+            minDate: "today",
+            maxDate: new Date().fp_incr(730) // 730 days from now
+        });
+    </script>
+
+    <script src="static/js/search.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+</body>
+</html>

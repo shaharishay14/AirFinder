@@ -1,0 +1,73 @@
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+
+    <link rel="stylesheet" href="static/css/listings_results.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{%url 'index'%}">AirFinder</a>
+        <div class="action">
+            <div class="profile" onclick="menuToggle();">
+              <img src="/static/img/user.png"/>
+            </div>
+            <div class="menu">
+              <h3>{{request.user}}<br/></h3>
+              <ul>
+                <li>
+                  <img src="/static/img/user.png" /><a href="{%url 'my_listings'%}">My Listings</a>
+                </li>
+                <li>
+                  <img src="/static/img/log-out.png" /><a href="{%url 'logout'%}">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <script>
+            function menuToggle() {
+              const toggleMenu = document.querySelector(".menu");
+              toggleMenu.classList.toggle("active");
+            }
+          </script>
+          <form action="{%url 'search'%}">
+            <div class="btn-box">
+              <button class="btn btn-0" id="search" onclick="openSearchPage()">Search Again</button>
+            </div>
+          </form>
+    </nav>       
+    <form action="" class="listings-form" method="GET">
+      <div class="container">
+        {% for listing in listings %}
+          <div class="listing-container">
+            <article class="listing-article">
+              <img src="{{listing.image}}" alt="" class="listing-img">
+              <div class="listing-data">
+                <div class="like-button">
+                  <div class="heart-bg">
+                      <div class="heart-icon" data-listing-id="{{listing.id}}"></div> 
+                  </div>
+                </div>
+                <h2 class="listing-title">{{listing.title}}</h2>
+                <span class="listing-description">Price: {{listing.price}}</span>
+                <div class="listings-description">Rating: {{listing.rating}}</div>
+                <a target="_blank" href="{{listing.link}}" class="listing-link">Visit Website</a>
+              </div>
+            </article>
+          </div>
+        {% empty %}
+          <p>No listings found.</p>
+        {% endfor %}
+      </div>  
+    </form> 
+    <script src="static/js/results.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+</body>
+</html>
